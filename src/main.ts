@@ -26,7 +26,7 @@ export async function bootstrap(): Promise<NestExpressApplication> {
     new ExpressAdapter(),
     { cors: true },
   );
-  // app.setGlobalPrefix('/api'); use api as global prefix if you don't have subdomain
+  app.setGlobalPrefix('/api');
   app.use(compression());
   app.use(morgan('combined'));
   app.enableVersioning();

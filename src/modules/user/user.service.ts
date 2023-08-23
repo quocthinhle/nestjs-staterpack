@@ -17,12 +17,15 @@ import type { UserDto } from './dtos/user.dto';
 import type { UsersPageOptionsDto } from './dtos/users-page-options.dto';
 import { UserEntity } from './user.entity';
 import type { UserSettingsEntity } from './user-settings.entity';
+import { UserTokenEntity } from './user-token.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
+    @InjectRepository(UserTokenEntity)
+    private userTokenRepository: Repository<UserTokenEntity>,
     private validatorService: ValidatorService,
     private commandBus: CommandBus,
   ) {}
@@ -112,5 +115,47 @@ export class UserService {
     return this.commandBus.execute<CreateSettingsCommand, UserSettingsEntity>(
       new CreateSettingsCommand(userId, createSettingsDto),
     );
+  }
+
+  async storeUserToken({
+    userId,
+    refreshToken,
+  }: {
+    userId: Uuid;
+    refreshToken: string;
+  }) {
+    return this.userTokenRepository
+      .createQueryBuilder()
+      .insert()
+      .values({
+        userId,
+        refreshToken,
+      })
+      .execute();
+  }
+
+  async revokeUserTokens(userId: Uuid) {
+    await this.userTokenRepository
+      .createQueryBuilder()
+      .update()
+      .set({
+        revoked: true,
+      })
+      .where('user_id = :userId', { userId })
+      .execute();
+  }
+
+  async getUserToken({
+    userId,
+    refreshToken,
+  }: {
+    userId: Uuid;
+    refreshToken: string;
+  }): Promise<UserTokenEntity | null> {
+    return this.userTokenRepository
+      .createQueryBuilder()
+      .where('user_id = :userId', { userId })
+      .andWhere('refresh_token = :refreshToken', { refreshToken })
+      .getOne();
   }
 }

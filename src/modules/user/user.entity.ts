@@ -1,4 +1,4 @@
-import { Column, Entity, OneToOne, VirtualColumn } from 'typeorm';
+import { Column, Entity, OneToMany, OneToOne, VirtualColumn } from 'typeorm';
 
 import { AbstractEntity } from '../../common/abstract.entity';
 import { RoleType } from '../../constants';
@@ -6,6 +6,7 @@ import { UseDto } from '../../decorators';
 import type { UserDtoOptions } from './dtos/user.dto';
 import { UserDto } from './dtos/user.dto';
 import { UserSettingsEntity } from './user-settings.entity';
+import { UserTokenEntity } from './user-token.entity';
 
 @Entity({ name: 'users' })
 @UseDto(UserDto)
@@ -39,4 +40,7 @@ export class UserEntity extends AbstractEntity<UserDto, UserDtoOptions> {
 
   @OneToOne(() => UserSettingsEntity, (userSettings) => userSettings.user)
   settings?: UserSettingsEntity;
+
+  @OneToMany(() => UserTokenEntity, (userToken) => userToken.user)
+  tokens?: UserTokenEntity[];
 }

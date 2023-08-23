@@ -8,7 +8,33 @@ import { SnakeNamingStrategy } from '../../snake-naming.strategy';
 
 @Injectable()
 export class ApiConfigService {
-  constructor(private configService: ConfigService) {}
+  #authConfig: Record<string, string | number>;
+
+  constructor(private configService: ConfigService) {
+    this.onInit();
+  }
+
+  onInit() {
+    this.#authConfig = {
+      accessTokenPrivateKey: Buffer.from(
+        this.get('JWT_ACCESS_PRIVATE_KEY'),
+        'base64',
+      ).toString('utf8'),
+      accessTokenPublicKey: Buffer.from(
+        this.get('JWT_ACCESS_PUBLIC_KEY'),
+        'base64',
+      ).toString('utf8'),
+      refreshTokenPublicKey: Buffer.from(
+        this.get('JWT_REFRESH_PUBLIC_KEY'),
+        'base64',
+      ).toString('utf8'),
+      refreshTokenPrivateKey: Buffer.from(
+        this.get('JWT_REFRESH_PRIVATE_KEY'),
+        'base64',
+      ).toString('utf8'),
+      jwtExpirationTime: this.getNumber('JWT_EXPIRATION_TIME'),
+    };
+  }
 
   get isDevelopment(): boolean {
     return this.nodeEnv === 'development';
@@ -119,15 +145,21 @@ export class ApiConfigService {
   }
 
   get authConfig() {
-    return {
-      privateKey: Buffer.from(this.get('JWT_PRIVATE_KEY'), 'base64').toString(
-        'utf8',
-      ),
-      publicKey: Buffer.from(this.get('JWT_PUBLIC_KEY'), 'base64').toString(
-        'utf8',
-      ),
-      jwtExpirationTime: this.getNumber('JWT_EXPIRATION_TIME'),
+    return this.#authConfig as {
+      accessTokenPrivateKey: string;
+      accessTokenPublicKey: string;
+      refreshTokenPublicKey: string;
+      refreshTokenPrivateKey: string;
+      jwtExpirationTime: number;
     };
+  }
+
+  get accessTokenLifeTime() {
+    return this.getString('ACCESS_TOKEN_TTL');
+  }
+
+  get refreshTokenLifeTime() {
+    return this.getString('REFRESH_TOKEN_TTL');
   }
 
   get appConfig() {

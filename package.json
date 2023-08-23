@@ -1,8 +1,8 @@
 {
-  "name": "awesome-nestjs-boilerplate",
+  "name": "sgroup-management-be",
   "version": "10.0.0",
-  "description": "Awesome NestJS Boilerplate, Typescript, Postgres, TypeORM",
-  "author": "Narek Hakobyan <narek.hakobyan.07@gmail.com>",
+  "description": "SGroup Management Project",
+  "author": "Sgroup <sgroupvn@sgroup.org>",
   "private": true,
   "license": "MIT",
   "scripts": {
@@ -72,6 +72,9 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^17.7.1",
+    "@commitlint/config-angular": "^17.7.0",
+    "@commitlint/config-conventional": "^17.7.0",
     "@handfish/hygen": "^6.1.6",
     "@nestjs/cli": "^10.1.8",
     "@nestjs/testing": "^10.0.5",

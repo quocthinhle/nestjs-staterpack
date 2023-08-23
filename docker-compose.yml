@@ -3,7 +3,6 @@ services:
   app:
     env_file:
       - .env
-    container_name: awesome_nest_boilerplate
     restart: always
     build: .
     ports:

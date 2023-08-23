@@ -6,11 +6,14 @@ import { UserController } from './user.controller';
 import { UserEntity } from './user.entity';
 import { UserService } from './user.service';
 import { UserSettingsEntity } from './user-settings.entity';
+import { UserTokenEntity } from './user-token.entity';
 
 export const handlers = [CreateSettingsHandler];
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, UserSettingsEntity])],
+  imports: [
+    TypeOrmModule.forFeature([UserEntity, UserSettingsEntity, UserTokenEntity]),
+  ],
   controllers: [UserController],
   exports: [UserService],
   providers: [UserService, ...handlers],

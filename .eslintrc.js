@@ -5,7 +5,7 @@ module.exports = {
     es6: true,
     node: true,
   },
-  ignorePatterns: ['.eslintrc.js'],
+  ignorePatterns: ['.eslintrc.js', 'src/database/migrations/*.ts'],
   parserOptions: {
     ecmaVersion: 2020,
     project: './tsconfig.eslint.json',
@@ -40,6 +40,7 @@ module.exports = {
         }
       }
     ],
+    
     'unicorn/prefer-top-level-await': 'off',
     'unicorn/prevent-abbreviations': 'off',
     'unicorn/no-null': 'off',
@@ -63,6 +64,7 @@ module.exports = {
       {argsIgnorePattern: '^_', 'vars': 'all', 'args': 'after-used'},
     ],
     '@typescript-eslint/adjacent-overload-signatures': 'error',
+    "@typescript-eslint/no-unsafe-enum-comparison": "off",
     '@typescript-eslint/array-type': ['error', {default: 'array-simple'}],
     '@typescript-eslint/ban-types': [
       'error',

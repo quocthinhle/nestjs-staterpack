@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { validateHash } from '../../common/utils';
@@ -19,18 +19,92 @@ export class AuthService {
     private userService: UserService,
   ) {}
 
-  async createAccessToken(data: {
+  async generateTokenPair(data: {
+    role: RoleType;
+    userId: Uuid;
+  }): Promise<{ accessToken: string; refreshToken: string }> {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(
+        {
+          userId: data.userId,
+          type: TokenType.ACCESS_TOKEN,
+          role: data.role,
+        },
+        {
+          expiresIn: this.configService.accessTokenLifeTime,
+        },
+      ),
+      this.jwtService.signAsync(
+        {
+          userId: data.userId,
+          type: TokenType.REFRESH_TOKEN,
+        },
+        {
+          privateKey: this.configService.authConfig.refreshTokenPrivateKey,
+          expiresIn: this.configService.refreshTokenLifeTime,
+        },
+      ),
+    ]);
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async handleLogin(data: {
     role: RoleType;
     userId: Uuid;
   }): Promise<TokenPayloadDto> {
-    return new TokenPayloadDto({
-      expiresIn: this.configService.authConfig.jwtExpirationTime,
-      accessToken: await this.jwtService.signAsync({
-        userId: data.userId,
-        type: TokenType.ACCESS_TOKEN,
-        role: data.role,
-      }),
+    const { role, userId } = data;
+
+    const { accessToken, refreshToken } = await this.generateTokenPair({
+      role,
+      userId,
     });
+
+    await this.storeRefreshTokenInfo({
+      userId,
+      refreshToken,
+    });
+
+    return new TokenPayloadDto({
+      accessToken,
+      refreshToken,
+    });
+  }
+
+  async grantAccessToken(
+    user: UserEntity,
+    refreshToken: string,
+  ): Promise<TokenPayloadDto> {
+    const currentUserToken = await this.userService.getUserToken({
+      userId: user.id,
+      refreshToken,
+    });
+
+    if (!currentUserToken) {
+      throw new UnauthorizedException();
+    }
+
+    if (currentUserToken.revoked) {
+      await this.userService.revokeUserTokens(user.id);
+
+      throw new UnauthorizedException();
+    }
+
+    const token = await this.generateTokenPair({
+      role: user.role,
+      userId: user.id,
+    });
+
+    await this.userService.revokeUserTokens(user.id);
+    await this.userService.storeUserToken({
+      userId: user.id,
+      refreshToken: token.refreshToken,
+    });
+
+    return new TokenPayloadDto(token);
   }
 
   async validateUser(userLoginDto: UserLoginDto): Promise<UserEntity> {
@@ -48,5 +122,19 @@ export class AuthService {
     }
 
     return user!;
+  }
+
+  async storeRefreshTokenInfo({
+    userId,
+    refreshToken,
+  }: {
+    userId: Uuid;
+    refreshToken: string;
+  }) {
+    await this.userService.revokeUserTokens(userId);
+    await this.userService.storeUserToken({
+      refreshToken,
+      userId,
+    });
   }
 }
