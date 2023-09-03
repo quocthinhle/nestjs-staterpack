@@ -7,9 +7,9 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Permission } from '@src/constants/permission';
 
 import { PageDto } from '../../common/dto/page.dto';
-import { RoleType } from '../../constants';
 import { ApiPageOkResponse, Auth, UUIDParam } from '../../decorators';
 import { UserDto } from './dtos/user.dto';
 import { UsersPageOptionsDto } from './dtos/users-page-options.dto';
@@ -21,7 +21,9 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Get()
-  @Auth([RoleType.USER])
+  @Auth({
+    permissions: [Permission.CanGetListPermissions, Permission.CanGetListUsers],
+  })
   @HttpCode(HttpStatus.OK)
   @ApiPageOkResponse({
     description: 'Get users list',
@@ -35,7 +37,7 @@ export class UserController {
   }
 
   @Get(':id')
-  @Auth([RoleType.USER])
+  //   @Auth([RoleType.USER])
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
     status: HttpStatus.OK,

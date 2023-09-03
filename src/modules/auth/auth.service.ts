@@ -2,10 +2,10 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { validateHash } from '../../common/utils';
-import type { RoleType } from '../../constants';
 import { TokenType } from '../../constants';
 import { UserNotFoundException } from '../../exceptions';
 import { ApiConfigService } from '../../shared/services/api-config.service';
+import type { RoleEntity } from '../access-control/role/role.entity';
 import type { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import { TokenPayloadDto } from './dto/TokenPayloadDto';
@@ -20,7 +20,6 @@ export class AuthService {
   ) {}
 
   async generateTokenPair(data: {
-    role: RoleType;
     userId: Uuid;
   }): Promise<{ accessToken: string; refreshToken: string }> {
     const [accessToken, refreshToken] = await Promise.all([
@@ -28,7 +27,6 @@ export class AuthService {
         {
           userId: data.userId,
           type: TokenType.ACCESS_TOKEN,
-          role: data.role,
         },
         {
           expiresIn: this.configService.accessTokenLifeTime,
@@ -53,13 +51,12 @@ export class AuthService {
   }
 
   async handleLogin(data: {
-    role: RoleType;
+    role?: RoleEntity;
     userId: Uuid;
   }): Promise<TokenPayloadDto> {
-    const { role, userId } = data;
+    const { userId } = data;
 
     const { accessToken, refreshToken } = await this.generateTokenPair({
-      role,
       userId,
     });
 
@@ -94,7 +91,6 @@ export class AuthService {
     }
 
     const token = await this.generateTokenPair({
-      role: user.role,
       userId: user.id,
     });
 

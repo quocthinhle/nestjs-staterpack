@@ -34,7 +34,16 @@ export class UserService {
    * Find single user
    */
   findOne(findData: FindOptionsWhere<UserEntity>): Promise<UserEntity | null> {
-    return this.userRepository.findOneBy(findData);
+    return this.userRepository.findOne({
+      where: {
+        id: findData.id,
+      },
+      relations: {
+        role: {
+          permissions: true,
+        },
+      },
+    });
   }
 
   async findByUsernameOrEmail(

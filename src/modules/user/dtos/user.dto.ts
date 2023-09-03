@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import type { RoleDto } from '@src/modules/access-control/role/dtos/role.dto';
 
 import { AbstractDto } from '../../../common/dto/abstract.dto';
-import { RoleType } from '../../../constants';
 import type { UserEntity } from '../user.entity';
 
 // TODO, remove this class and use constructor's second argument's type
@@ -17,9 +17,6 @@ export class UserDto extends AbstractDto {
   @ApiProperty()
   username: string;
 
-  @ApiPropertyOptional({ enum: RoleType })
-  role: RoleType;
-
   @ApiPropertyOptional()
   email?: string;
 
@@ -32,14 +29,16 @@ export class UserDto extends AbstractDto {
   @ApiPropertyOptional()
   isActive?: boolean;
 
+  role?: RoleDto;
+
   constructor(user: UserEntity, options?: UserDtoOptions) {
     super(user);
     this.firstName = user.firstName;
     this.lastName = user.lastName;
-    this.role = user.role;
     this.email = user.email;
     this.avatar = user.avatar;
     this.phone = user.phone;
     this.isActive = options?.isActive;
+    this.role = user.role?.toDto();
   }
 }

@@ -19,6 +19,20 @@ export class HttpResponseTransformInterceptor<T>
     context: ExecutionContext,
     next: CallHandler,
   ): Observable<IResponse<T>> {
-    return next.handle().pipe(map((data) => ({ data, success: true })));
+    return next.handle().pipe(
+      map((response) => {
+        if (response?.data) {
+          return {
+            data: response.data,
+            success: true,
+          };
+        }
+
+        return {
+          data: response || {},
+          success: true,
+        };
+      }),
+    );
   }
 }

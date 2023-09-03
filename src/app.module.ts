@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/require-await */
 import './boilerplate.polyfill';
 
 import { Module } from '@nestjs/common';
@@ -9,6 +8,8 @@ import { DataSource } from 'typeorm';
 import { addTransactionalDataSource } from 'typeorm-transactional';
 
 import { HttpResponseTransformInterceptor } from './interceptors/http-response-transform.service';
+import { PermissionModule } from './modules/access-control/permission/permission.module';
+import { RoleModule } from './modules/access-control/role/role.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthCheckerModule } from './modules/health-checker/health-checker.module';
 import { UserModule } from './modules/user/user.module';
@@ -19,6 +20,8 @@ import { SharedModule } from './shared/shared.module';
   imports: [
     AuthModule,
     UserModule,
+    RoleModule,
+    PermissionModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',

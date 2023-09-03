@@ -1,8 +1,16 @@
-import { Column, Entity, OneToMany, OneToOne, VirtualColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  VirtualColumn,
+} from 'typeorm';
 
 import { AbstractEntity } from '../../common/abstract.entity';
-import { RoleType } from '../../constants';
 import { UseDto } from '../../decorators';
+import { RoleEntity } from '../access-control/role/role.entity';
 import type { UserDtoOptions } from './dtos/user.dto';
 import { UserDto } from './dtos/user.dto';
 import { UserSettingsEntity } from './user-settings.entity';
@@ -17,10 +25,7 @@ export class UserEntity extends AbstractEntity<UserDto, UserDtoOptions> {
   @Column({ nullable: true })
   lastName?: string;
 
-  @Column({ type: 'enum', enum: RoleType, default: RoleType.USER })
-  role: RoleType;
-
-  @Column({ unique: true, nullable: true })
+  @Column({ unique: true, nullable: false })
   email?: string;
 
   @Column({ nullable: true })
@@ -43,4 +48,14 @@ export class UserEntity extends AbstractEntity<UserDto, UserDtoOptions> {
 
   @OneToMany(() => UserTokenEntity, (userToken) => userToken.user)
   tokens?: UserTokenEntity[];
+
+  @ManyToOne(() => RoleEntity, (role) => role.user)
+  @JoinTable()
+  role?: RoleEntity;
+
+  @Column({ nullable: false, type: Boolean, default: true })
+  isActive: boolean;
+
+  @Column({ nullable: false, type: Boolean, default: false })
+  isDeleted: boolean;
 }

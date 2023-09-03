@@ -18,15 +18,13 @@
     "baseUrl": "./src",
     "incremental": true,
     "strictNullChecks": true,
-    "lib": [
-        "ES2021.String"
-    ]
+    "lib": ["ES2021.String"],
+    "paths": {
+        "@src": ["./"],
+        "@src/*": ["./*"]
+    },
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.spec.ts"
-  ]
+  "include": ["src/**/*"],
+
+  "exclude": ["node_modules", "**/*.spec.ts"]
 }
